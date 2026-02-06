@@ -657,7 +657,7 @@ Round ${idx + 1}:
                 <p className="text-gray-700 mb-4 text-center">
                   After playing this game, would you consider buying or using a solar electric bicycle like E-VIBE?
                 </p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   {['Yes', 'Maybe', 'No'].map((option) => (
                     <button
                       key={option}
@@ -665,14 +665,18 @@ Round ${idx + 1}:
                         setPurchaseIntention(option);
                         setTimeout(() => sendDataToEmail(), 500);
                       }}
-                      className={`py-3 px-4 rounded-xl font-bold transition-all duration-300 ${
+                      disabled={isSubmitting}
+                      className={`py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg ${
                         option === 'Yes'
-                          ? 'bg-green-500 hover:bg-green-600 text-white'
+                          ? 'bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white disabled:from-green-400 disabled:to-green-600'
                           : option === 'Maybe'
-                          ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                          : 'bg-gray-400 hover:bg-gray-500 text-white'
+                          ? 'bg-gradient-to-br from-yellow-400 to-amber-600 hover:from-yellow-500 hover:to-amber-700 text-white disabled:from-yellow-400 disabled:to-amber-600'
+                          : 'bg-gradient-to-br from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white disabled:from-gray-400 disabled:to-gray-600'
                       }`}
                     >
+                      <span className="block text-2xl mb-1">
+                        {option === 'Yes' ? '✅' : option === 'Maybe' ? '🤔' : '❌'}
+                      </span>
                       {option}
                     </button>
                   ))}
