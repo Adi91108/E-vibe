@@ -667,10 +667,10 @@ Round ${idx + 1}:
                       }}
                       className={`py-3 px-4 rounded-xl font-bold transition-all duration-300 ${
                         option === 'Yes'
-                          ? 'bg-green-500 hover:bg-green-600 text-black'
+                          ? 'bg-green-500 hover:bg-green-600 text-white'
                           : option === 'Maybe'
-                          ? 'bg-yellow-500 hover:bg-yellow-600 text-black  '
-                          : 'bg-gray-400 hover:bg-gray-500 text-black'
+                          ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                          : 'bg-gray-400 hover:bg-gray-500 text-white'
                       }`}
                     >
                       {option}
