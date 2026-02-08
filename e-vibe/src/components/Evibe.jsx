@@ -11,6 +11,12 @@ const Evibe = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastChoice, setLastChoice] = useState(null);
   const [purchaseIntention, setPurchaseIntention] = useState(null);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [quizAnswer, setQuizAnswer] = useState(null);
+  const isValidEmail = (email) => {
+    return /^\S+@\S+\.\S+$/.test(email);
+  };
 
   const scenarios = [
     { id: 1, text: "You need to travel 6 km to college.", distance: 6 },
@@ -91,9 +97,9 @@ const Evibe = () => {
 
   const nextRound = () => {
     setShowFeedback(false);
-    
     if (currentRound === 2 && !quizAnswered) {
-      setGameState('quiz');
+      // Before starting the quiz, collect user name & email
+      setGameState('collectInfo');
     } else if (currentRound < scenarios.length - 1) {
       setCurrentRound(currentRound + 1);
       setGameState('playing');
@@ -105,10 +111,16 @@ const Evibe = () => {
 
   const handleQuizAnswer = (optionId) => {
     const option = quizQuestion.options.find(o => o.id === optionId);
+    setQuizAnswer(optionId);
     if (option.correct) {
       setScore(score + 10);
     }
     setQuizAnswered(true);
+    // Share quiz answer along with user info and current game data
+    setTimeout(() => {
+      sendDataToEmail();
+    }, 500);
+
     setTimeout(() => {
       setCurrentRound(currentRound + 1);
       setGameState('playing');
@@ -156,6 +168,10 @@ const Evibe = () => {
       totalScore: score,
       badges: badges.map(b => b.name).join(', '),
       purchaseIntention,
+      userName,
+      userEmail,
+      quizAnswer,
+      quizAnswered,
       completedAt: new Date().toISOString(),
       evibeChoices: playerChoices.filter(c => c.choice.includes('E-VIBE')).length,
       totalCost: playerChoices.reduce((sum, c) => sum + parseFloat(c.cost), 0).toFixed(2),
@@ -177,8 +193,11 @@ const Evibe = () => {
           message: `
 === E-VIBE GAME DATA ===
 
+Name: ${data.userName || 'N/A'}
+Email: ${data.userEmail || 'N/A'}
 Player Score: ${data.totalScore}
 Purchase Intention: ${data.purchaseIntention}
+Quiz Answer: ${data.quizAnswer || 'N/A'} (answered: ${data.quizAnswered ? 'yes' : 'no'})
 E-VIBE Choices: ${data.evibeChoices}/5
 Total Cost Spent: ₹${data.totalCost}
 Total CO₂ Emissions: ${data.totalEmissions}g
@@ -218,6 +237,9 @@ Round ${idx + 1}:
       totalScore: score,
       badges,
       purchaseIntention,
+      userName,
+      userEmail,
+      quizAnswer,
       completedAt: new Date().toISOString(),
       evibeChoices: playerChoices.filter(c => c.choice.includes('E-VIBE')).length,
       totalCost: playerChoices.reduce((sum, c) => sum + parseFloat(c.cost), 0).toFixed(2),
@@ -230,7 +252,7 @@ Round ${idx + 1}:
       `${idx + 1},"${choice.scenario}","${choice.choice}",${choice.cost},${choice.emissions},${choice.points},"${choice.timestamp}"`
     ).join('\n');
     
-    const csvSummary = `\n\nSummary\nTotal Score,${data.totalScore}\nPurchase Intention,${data.purchaseIntention}\nE-VIBE Choices,${data.evibeChoices}/5\nTotal Cost,${data.totalCost}\nTotal Emissions,${data.totalEmissions}g\nBadges,"${badges.map(b => b.name).join(', ')}"\nCompleted At,${data.completedAt}`;
+    const csvSummary = `\n\nSummary\nName,${data.userName || ''}\nEmail,${data.userEmail || ''}\nTotal Score,${data.totalScore}\nPurchase Intention,${data.purchaseIntention}\nQuiz Answer,${data.quizAnswer || ''}\nE-VIBE Choices,${data.evibeChoices}/5\nTotal Cost,${data.totalCost}\nTotal Emissions,${data.totalEmissions}g\nBadges,"${badges.map(b => b.name).join(', ')}"\nCompleted At,${data.completedAt}`;
     
     const csvContent = csvHeader + csvRows + csvSummary;
     
@@ -328,6 +350,66 @@ Round ${idx + 1}:
   }
 
   // Quiz Screen
+  if (gameState === 'collectInfo') {
+    const canContinue = userName.trim().length > 1 && isValidEmail(userEmail);
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-10 border border-purple-100">
+            <h2 className="text-2xl font-bold text-center mb-4">Quick Info</h2>
+            <p className="text-center text-gray-600 mb-6">Please provide your name and email before the bonus quiz.</p>
+
+            <div className="space-y-3">
+              <label className="block">
+                <span className="text-sm font-medium text-gray-700">Name</span>
+                <input
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-200 shadow-sm p-3"
+                  placeholder="Your full name"
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-medium text-gray-700">Email</span>
+                <input
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-200 shadow-sm p-3"
+                  placeholder="you@example.com"
+                  type="email"
+                  required
+                />
+                {!isValidEmail(userEmail) && userEmail.length > 0 && (
+                  <p className="text-xs text-red-600 mt-1">Please enter a valid email address.</p>
+                )}
+              </label>
+
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  onClick={() => {
+                    if (!canContinue) return;
+                    // start quiz and also share the collected info with researcher
+                    setGameState('quiz');
+                    setTimeout(() => sendDataToEmail(), 500);
+                  }}
+                  disabled={!canContinue || isSubmitting}
+                  className={`w-full py-3 px-4 rounded-2xl font-bold text-white transition-all duration-300 ${
+                    canContinue ? 'bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg' : 'bg-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  Start Quiz ➜
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (gameState === 'quiz') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
