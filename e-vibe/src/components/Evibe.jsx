@@ -109,6 +109,15 @@ const Evibe = () => {
     }
   };
 
+
+    const handleExploreClick = () => {
+    // In production, redirect to Website page
+    window.location.href = 'https://prachi459.github.io/E-VIBE/';
+    alert('Redirecting to E-VIBE product page...\n\nIn production, this would open your Website store.');
+    // downloadAnalytics();
+  };
+
+
   const handleQuizAnswer = (optionId) => {
     const option = quizQuestion.options.find(o => o.id === optionId);
     setQuizAnswer(optionId);
@@ -816,16 +825,28 @@ Round ${idx + 1}:
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 onClick={resetGame}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-lg font-bold py-4 px-8 rounded-2xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg"
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-lg font-bold py-4 px-8 rounded-2xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 🔄 Play Again
               </button>
               <button
                 onClick={downloadData}
-                className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-lg font-bold py-4 px-8 rounded-2xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 shadow-lg"
+                className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-lg font-bold py-4 px-8 rounded-2xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 📥 Download CSV (Excel)
               </button>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={handleExploreClick}
+                className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white text-xl font-bold py-5 px-8 rounded-2xl hover:from-amber-600 hover:via-orange-600 hover:to-red-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+              >
+                🛍️ Visit Our Store
+              </button>
+              <p className="text-center text-sm text-gray-500 mt-2">
+                Ready to ride? Check out E-VIBE products →
+              </p>
             </div>
 
             {/* Footer Note */}
